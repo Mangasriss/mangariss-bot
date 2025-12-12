@@ -1,0 +1,56 @@
+name: Manga Update Bot
+
+on:
+  schedule:
+    # ⚠️ CRON : Toutes les 15 minutes (00, 15, 30, 45)
+    - cron: '*/15 * * * *'
+  # Permet de lancer manuellement depuis l'onglet "Actions" pour tester
+  workflow_dispatch:
+
+# Indispensable pour que le bot puisse modifier les JSON et les pusher
+permissions:
+  contents: write
+
+jobs:
+  update-mangas:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Récupération du code source
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Installation de Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # 3. Installation des librairies (requests, b2sdk, etc.)
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      # 4. Lancement du Bot
+      # On injecte les secrets GitHub dans les variables d'environnement
+      - name: Run Manga Bot
+        env:
+          B2_KEY_ID: ${{ secrets.B2_KEY_ID }}
+          B2_APP_KEY: ${{ secrets.B2_APP_KEY }}
+          B2_BUCKET: ${{ secrets.B2_BUCKET }}
+        run: python bot.py
+
+      # 5. Sauvegarde des modifications (API JSON)
+      # Le script ne commit que si des fichiers ont changé dans le dossier api/
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name 'MangaBot'
+          git config --global user.email 'bot@noreply.github.com'
+          
+          # On ajoute les fichiers générés
+          git add api/
+          
+          # Vérification : Y a-t-il des changements ?
+          # Si oui -> Commit et Push
+          # Si non -> Ne rien faire (évite les erreurs de commit vide)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Mise à jour automatique (15 min)" && git push)

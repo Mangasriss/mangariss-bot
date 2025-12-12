@@ -1,0 +1,5 @@
+requests
+cloudscraper
+beautifulsoup4
+b2sdk
+lxml
