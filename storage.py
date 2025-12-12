@@ -41,7 +41,7 @@ def upload_cover(manga_name):
             b2_path = f"mangas/{manga_name}/cover.jpg"
             bucket.upload_local_file(local_file=local_path, file_name=b2_path)
             # URL Publique (A adapter selon ton cluster f002/f004)
-            return f"https://f002.backblazeb2.com/file/{creds['bucket_name']}/{b2_path}"
+            return f"https://f003.backblazeb2.com/file/{creds['bucket_name']}/{b2_path}"
     return None
 
 def list_chapters_on_b2(manga_name):

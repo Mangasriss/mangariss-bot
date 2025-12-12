@@ -47,10 +47,20 @@ jobs:
           git config --global user.name 'MangaBot'
           git config --global user.email 'bot@noreply.github.com'
           
-          # On ajoute les fichiers générés
+          # 1. On ajoute les fichiers
           git add api/
           
-          # Vérification : Y a-t-il des changements ?
-          # Si oui -> Commit et Push
-          # Si non -> Ne rien faire (évite les erreurs de commit vide)
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Mise à jour automatique (15 min)" && git push)
+          # 2. Vérification s'il y a des changements
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "✅ Aucun changement détecté, on arrête."
+            exit 0
+          fi
+
+          # 3. On commit
+          git commit -m "Mise à jour automatique (Bot)"
+          
+          # 4. LE FIX : On récupère la dernière version serveur avant de pousser
+          git pull --rebase origin main
+          
+          # 5. On envoie
+          git push origin main
