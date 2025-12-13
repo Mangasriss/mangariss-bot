@@ -75,3 +75,16 @@ def list_files_in_chapter(manga_name, chapter_num):
         # Si le dossier n'existe pas encore, c'est pas grave
         pass
     return files
+
+def delete_chapter_folder(manga_name, chapter_num):
+    """ Supprime tous les fichiers d'un chapitre spécifique sur B2 """
+    prefix = f"mangas/{manga_name}/{chapter_num}/"
+    print(f"🗑️ NETTOYAGE : Suppression du vieux chapitre {manga_name} {chapter_num}...")
+    
+    # On liste toutes les versions de fichiers dans ce dossier
+    # Note: B2 garde parfois des versions cachées, on veut tout nettoyer
+    for file_version, _ in bucket.ls(folder_to_list=prefix, recursive=True, show_versions=True):
+        try:
+            bucket.delete_file_version(file_version.id_ , file_version.file_name)
+        except Exception as e:
+            print(f"   ⚠️ Erreur suppression fichier {file_version.file_name}: {e}")
