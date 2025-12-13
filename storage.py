@@ -48,16 +48,22 @@ def list_chapters_on_b2(manga_name):
     """ Liste quels numéros de chapitres existent déjà (Ignore cover.jpg) """
     prefix = f"mangas/{manga_name}/"
     chapters = set()
-    # Listing récursif
+    
+    # On utilise latest_only=True pour juste lister les dossiers actuels
     for file_version, _ in bucket.ls(folder_to_list=prefix, recursive=True):
-        # file_name = mangas/One Piece/1147/01.png
+        # Structure : mangas / One Piece / 1147 / 01.png
         parts = file_version.file_name.split('/')
+        
+        # Sécurité : on vérifie qu'on est bien dans un sous-dossier
         if len(parts) >= 3:
             chap_name = parts[2]
-            # 🛑 SÉCURITÉ : On ignore le fichier cover.jpg pour ne pas le supprimer
-            if chap_name == "cover.jpg":
+            
+            # 🛑 LE FIX EST ICI : On ignore explicitement cover.jpg
+            if chap_name == "cover.jpg" or chap_name.endswith(".jpg"):
                 continue
+                
             chapters.add(chap_name)
+            
     return list(chapters)
 
 def list_files_in_chapter(manga_name, chapter_num):
@@ -84,7 +90,7 @@ def delete_chapter_folder(manga_name, chapter_num):
     prefix = f"mangas/{manga_name}/{chapter_num}/"
     print(f"🗑️ NETTOYAGE : Suppression du vieux chapitre {manga_name} {chapter_num}...")
     
-    # CORRECTION : On utilise latest_only=False au lieu de show_versions=True
+    # 🛑 LE FIX EST ICI : latest_only=False (au lieu de show_versions=True)
     for file_version, _ in bucket.ls(folder_to_list=prefix, recursive=True, latest_only=False):
         try:
             bucket.delete_file_version(file_version.id_, file_version.file_name)

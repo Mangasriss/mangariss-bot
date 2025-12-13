@@ -91,8 +91,9 @@ def main():
         
         # B. Fonction de tri malin
         def sort_key(chap_str):
-            # Sécurité absolue : si c'est cover.jpg, on le met à l'infini pour ne jamais le supprimer
-            if "cover" in str(chap_str): return 999999.0 
+            # Sécurité absolue : si le nom contient "cover", on lui donne un score infini
+            # pour qu'il soit considéré comme "Le plus récent" et ne soit jamais supprimé.
+            if "cover" in str(chap_str).lower(): return 999999.0
             try: return float(chap_str)
             except: return 0.0
             
