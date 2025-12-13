@@ -89,10 +89,12 @@ def main():
         # A. On récupère TOUT ce qui est sur B2 pour ce manga
         b2_chapters = storage.list_chapters_on_b2(m_name)
         
-        # B. Fonction de tri malin (Gère "10", "10.5", "100")
+        # B. Fonction de tri malin
         def sort_key(chap_str):
+            # Sécurité absolue : si c'est cover.jpg, on le met à l'infini pour ne jamais le supprimer
+            if "cover" in str(chap_str): return 999999.0 
             try: return float(chap_str)
-            except: return 0.0 # Sécurité si le dossier s'appelle "Bonus"
+            except: return 0.0
             
         b2_chapters.sort(key=sort_key) # Tri croissant (1, 2, ..., 1168)
 

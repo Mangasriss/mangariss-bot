@@ -45,7 +45,7 @@ def upload_cover(manga_name):
     return None
 
 def list_chapters_on_b2(manga_name):
-    """ Liste quels numéros de chapitres existent déjà """
+    """ Liste quels numéros de chapitres existent déjà (Ignore cover.jpg) """
     prefix = f"mangas/{manga_name}/"
     chapters = set()
     # Listing récursif
@@ -53,8 +53,11 @@ def list_chapters_on_b2(manga_name):
         # file_name = mangas/One Piece/1147/01.png
         parts = file_version.file_name.split('/')
         if len(parts) >= 3:
-            # parts[2] est le numéro du chapitre
-            chapters.add(parts[2])
+            chap_name = parts[2]
+            # 🛑 SÉCURITÉ : On ignore le fichier cover.jpg pour ne pas le supprimer
+            if chap_name == "cover.jpg":
+                continue
+            chapters.add(chap_name)
     return list(chapters)
 
 def list_files_in_chapter(manga_name, chapter_num):
@@ -81,10 +84,9 @@ def delete_chapter_folder(manga_name, chapter_num):
     prefix = f"mangas/{manga_name}/{chapter_num}/"
     print(f"🗑️ NETTOYAGE : Suppression du vieux chapitre {manga_name} {chapter_num}...")
     
-    # On liste toutes les versions de fichiers dans ce dossier
-    # Note: B2 garde parfois des versions cachées, on veut tout nettoyer
-    for file_version, _ in bucket.ls(folder_to_list=prefix, recursive=True, show_versions=True):
+    # CORRECTION : On utilise latest_only=False au lieu de show_versions=True
+    for file_version, _ in bucket.ls(folder_to_list=prefix, recursive=True, latest_only=False):
         try:
-            bucket.delete_file_version(file_version.id_ , file_version.file_name)
+            bucket.delete_file_version(file_version.id_, file_version.file_name)
         except Exception as e:
             print(f"   ⚠️ Erreur suppression fichier {file_version.file_name}: {e}")
