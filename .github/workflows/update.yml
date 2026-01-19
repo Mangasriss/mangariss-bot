@@ -1,15 +1,19 @@
 name: Manga Update Bot
 
 on:
-  # schedule:
-    # ⚠️ CRON : Toutes les 15 minutes (00, 15, 30, 45)
-    # - cron: '*/15 * * * *'
+  schedule:
+    # CRON : Toutes les 5 minutes
+    - cron: '*/5 * * * *'
   # Permet de lancer manuellement depuis l'onglet "Actions" pour tester
   workflow_dispatch:
 
 # Indispensable pour que le bot puisse modifier les JSON et les pusher
 permissions:
   contents: write
+
+concurrency:
+  group: mangariss-bot
+  cancel-in-progress: true
 
 jobs:
   update-mangas:
@@ -18,17 +22,18 @@ jobs:
     steps:
       # 1. Récupération du code source
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # 2. Installation de Python
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       # 3. Installation des librairies (requests, b2sdk, etc.)
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       # 4. Lancement du Bot
@@ -46,10 +51,13 @@ jobs:
         run: |
           git config --global user.name 'MangaBot'
           git config --global user.email 'bot@noreply.github.com'
-          
+
+          # On se synchronise avant de committer (évite les conflits)
+          git pull --rebase origin "${{ github.ref_name }}"
+
           # 1. On ajoute les fichiers
           git add api/
-          
+
           # 2. Vérification s'il y a des changements
           if git diff --quiet && git diff --staged --quiet; then
             echo "✅ Aucun changement détecté, on arrête."
@@ -58,9 +66,6 @@ jobs:
 
           # 3. On commit
           git commit -m "Mise à jour automatique (Bot)"
-          
-          # 4. LE FIX : On récupère la dernière version serveur avant de pousser
-          git pull --rebase origin main
-          
-          # 5. On envoie
-          git push origin main
+
+          # 4. On envoie
+          git push origin "${{ github.ref_name }}"
