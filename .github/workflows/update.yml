@@ -3,7 +3,7 @@ name: Manga Update Bot
 on:
   schedule:
     # CRON : Toutes les 10 minutes
-    - cron: '*/10 * * * *'
+    - cron: '*/15 * * * *'
   # Permet de lancer manuellement depuis l'onglet "Actions" pour tester        
   workflow_dispatch:
 
