@@ -173,8 +173,8 @@ def main():
     with open('api/mangas.json', 'w', encoding='utf-8') as f:
         json.dump(api_list, f, indent=2, ensure_ascii=False)
 
-    logger.info("✅ Terminé avec succès !")
+    logger.info("✅ Terminé avec succès ! ")
 
 if __name__ == "__main__":
     main()
-
+    
