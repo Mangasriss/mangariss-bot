@@ -1,11 +1,16 @@
 name: Manga Update Bot
 
 on:
-  schedule:
-    # CRON : Toutes les 10 minutes
-    - cron: '*/15 * * * *'
-  # Permet de lancer manuellement depuis l'onglet "Actions" pour tester        
+  # Déclenchement via webhook (Discord -> Pipedream -> GitHub)
+  repository_dispatch:
+    types: [discord_ping]
+  # Permet de lancer manuellement depuis l'onglet "Actions" pour tester
   workflow_dispatch:
+
+  # (Optionnel) Réactiver le cron si besoin
+  # schedule:
+  #   # CRON : Toutes les 10 minutes
+  #   - cron: '*/10 * * * *'
 
 # Indispensable pour que le bot puisse modifier les JSON et les pusher
 permissions:
