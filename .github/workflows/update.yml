@@ -6,6 +6,11 @@ on:
     types: [discord_ping]
   # Permet de lancer manuellement depuis l'onglet "Actions" pour tester
   workflow_dispatch:
+    inputs:
+      manga:
+        description: "Nom du manga (optionnel, ex: One Piece ou One Piece, Naruto)"
+        required: false
+        type: string
 
   # (Optionnel) Réactiver le cron si besoin
   # schedule:
@@ -54,6 +59,7 @@ jobs:
           B2_KEY_ID: ${{ secrets.B2_KEY_ID }}
           B2_APP_KEY: ${{ secrets.B2_APP_KEY }}
           B2_BUCKET: ${{ secrets.B2_BUCKET }}
+          TRIGGER_MANGA: ${{ github.event.inputs.manga || github.event.client_payload.manga || '' }}
         run: python bot.py
 
       # 5. Sauvegarde des modifications (API JSON)

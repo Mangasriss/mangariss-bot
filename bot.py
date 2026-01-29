@@ -28,6 +28,30 @@ def load_mangas():
     if not os.path.exists('mangas.txt'): return []
     with open('mangas.txt', 'r') as f: return [line.strip() for line in f if line.strip()]
 
+# Filtre optionnel via variable d'environnement (ex: "One Piece" ou "One Piece, Naruto")
+def normalize_name(name):
+    if name is None: return ""
+    n = str(name).strip()
+    if n.startswith("@"): n = n[1:]
+    n = n.strip().strip('"').strip("'")
+    n = n.replace("’", "'")
+    n = " ".join(n.split())
+    return n.lower()
+
+def parse_trigger_mangas():
+    raw = os.getenv("TRIGGER_MANGA", "").strip()
+    if not raw: return []
+    if raw[0] in "[{":
+        try:
+            data = json.loads(raw)
+            if isinstance(data, dict) and "manga" in data: data = data["manga"]
+            if isinstance(data, str): return [normalize_name(data)] if data else []
+            if isinstance(data, list): return [normalize_name(x) for x in data if str(x).strip()]
+        except Exception:
+            pass
+    parts = [p for p in raw.split(",") if p.strip()]
+    return [normalize_name(p) for p in parts]
+
 # Fonction de tri robuste (déjà vue)
 def sort_key(chap_str):
     if "cover" in str(chap_str).lower(): return 999999.0
@@ -38,6 +62,15 @@ def main():
     logger.info("🤖 --- DÉMARRAGE BOT (Smart Filter) ---")
     config = load_config()
     tracked_names = load_mangas()
+    trigger = parse_trigger_mangas()
+    if trigger:
+        name_map = {normalize_name(n): n for n in tracked_names}
+        wanted = [name_map[t] for t in trigger if t in name_map]
+        if not wanted:
+            logger.info("⚠️ Aucun manga correspondant au trigger; arrêt.")
+            return
+        logger.info(f"🔔 Trigger: {', '.join(wanted)}")
+        tracked_names = wanted
     bot_scraper = scraper.MangaScraper(config)
     BUCKET = storage.creds['bucket_name']
     MAX_CHAPS = config.get('max_chapters', 0)
