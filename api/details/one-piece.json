@@ -4,6 +4,12 @@
   "cover": "https://f003.backblazeb2.com/file/Mangariss/mangas/One Piece/cover.jpg",
   "chapters": [
     {
+      "number": "1173",
+      "title": "Chapitre 1173",
+      "folder_url": "https://f003.backblazeb2.com/file/Mangariss/mangas/One Piece/1173/",
+      "pages_count": 15
+    },
+    {
       "number": "1172",
       "title": "Chapitre 1172",
       "folder_url": "https://f003.backblazeb2.com/file/Mangariss/mangas/One Piece/1172/",
@@ -56,12 +62,6 @@
       "title": "Chapitre 1164",
       "folder_url": "https://f003.backblazeb2.com/file/Mangariss/mangas/One Piece/1164/",
       "pages_count": 15
-    },
-    {
-      "number": "1163",
-      "title": "Chapitre 1163",
-      "folder_url": "https://f003.backblazeb2.com/file/Mangariss/mangas/One Piece/1163/",
-      "pages_count": 17
     }
   ]
 }
