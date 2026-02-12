@@ -52,6 +52,25 @@ def parse_trigger_mangas():
     parts = [p for p in raw.split(",") if p.strip()]
     return [normalize_name(p) for p in parts]
 
+# Scan IDs envoyés par le webhook (ex: OP1164, LDS91, ou URL ?scan=OP1164)
+def parse_trigger_scans():
+    raw = os.getenv("TRIGGER_SCAN", "").strip()
+    if not raw: return []
+    # Si on reçoit une URL complète
+    if "?scan=" in raw:
+        raw = raw.split("?scan=")[-1]
+    # Support JSON simple
+    if raw and raw[0] in "[{":
+        try:
+            data = json.loads(raw)
+            if isinstance(data, dict) and "scan" in data: data = data["scan"]
+            if isinstance(data, str): return [data.strip()] if data.strip() else []
+            if isinstance(data, list): return [str(x).strip() for x in data if str(x).strip()]
+        except Exception:
+            pass
+    parts = [p for p in raw.split(",") if p.strip()]
+    return [p.strip() for p in parts]
+
 # Fonction de tri robuste (déjà vue)
 def sort_key(chap_str):
     if "cover" in str(chap_str).lower(): return 999999.0
@@ -63,6 +82,7 @@ def main():
     config = load_config()
     tracked_names = load_mangas()
     trigger = parse_trigger_mangas()
+    trigger_scans = parse_trigger_scans()
     if trigger:
         name_map = {normalize_name(n): n for n in tracked_names}
         wanted = [name_map[t] for t in trigger if t in name_map]
@@ -109,9 +129,35 @@ def main():
         if cutoff_value > 0:
             logger.info(f"   🛡️ {m_name} : Filtre activé. On ignore tout ce qui est < Chapitre {cutoff_value}")
 
-    # 3. Scan Site Source
-    logger.info("📡 Scan des nouveautés...")
-    found_chapters = bot_scraper.get_latest_chapters_from_feed(config['pages_to_scan'], tracked_names)
+    # 3. Scan Site Source (ou mode direct via scan ID)
+    found_chapters = []
+    if trigger_scans:
+        logger.info("📡 Mode direct via scan ID...")
+        # Associe scans ↔ mangas (si un seul manga, on lui applique tous les scans)
+        if len(tracked_names) == 1:
+            for scan_id in trigger_scans:
+                c_num = "".join([c for c in scan_id if c.isdigit()]) or "0"
+                found_chapters.append({
+                    "manga_name": tracked_names[0],
+                    "author": "Inconnu",
+                    "scan_id": scan_id,
+                    "chapter_num": c_num,
+                    "chapter_title": ""
+                })
+        else:
+            for idx, scan_id in enumerate(trigger_scans):
+                manga_name = tracked_names[min(idx, len(tracked_names)-1)]
+                c_num = "".join([c for c in scan_id if c.isdigit()]) or "0"
+                found_chapters.append({
+                    "manga_name": manga_name,
+                    "author": "Inconnu",
+                    "scan_id": scan_id,
+                    "chapter_num": c_num,
+                    "chapter_title": ""
+                })
+    else:
+        logger.info("📡 Scan des nouveautés...")
+        found_chapters = bot_scraper.get_latest_chapters_from_feed(config['pages_to_scan'], tracked_names)
 
     # 4. Base de données pour le JSON final
     db_store = {}

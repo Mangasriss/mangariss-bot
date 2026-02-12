@@ -60,6 +60,7 @@ jobs:
           B2_APP_KEY: ${{ secrets.B2_APP_KEY }}
           B2_BUCKET: ${{ secrets.B2_BUCKET }}
           TRIGGER_MANGA: ${{ github.event.inputs.manga || github.event.client_payload.manga || '' }}
+          TRIGGER_SCAN: ${{ github.event.client_payload.scan || '' }}
         run: python bot.py
 
       # 5. Sauvegarde des modifications (API JSON)
