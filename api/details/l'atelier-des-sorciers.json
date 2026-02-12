@@ -4,6 +4,12 @@
   "cover": "https://f003.backblazeb2.com/file/Mangariss/mangas/L'Atelier des Sorciers/cover.jpg",
   "chapters": [
     {
+      "number": "92",
+      "title": "Chapitre 92",
+      "folder_url": "https://f003.backblazeb2.com/file/Mangariss/mangas/L'Atelier des Sorciers/92/",
+      "pages_count": 24
+    },
+    {
       "number": "91",
       "title": "Chapitre 91",
       "folder_url": "https://f003.backblazeb2.com/file/Mangariss/mangas/L'Atelier des Sorciers/91/",
@@ -56,12 +62,6 @@
       "title": "Chapitre 83",
       "folder_url": "https://f003.backblazeb2.com/file/Mangariss/mangas/L'Atelier des Sorciers/83/",
       "pages_count": 16
-    },
-    {
-      "number": "82",
-      "title": "Chapitre 82",
-      "folder_url": "https://f003.backblazeb2.com/file/Mangariss/mangas/L'Atelier des Sorciers/82/",
-      "pages_count": 27
     }
   ]
 }
