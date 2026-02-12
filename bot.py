@@ -71,6 +71,24 @@ def parse_trigger_scans():
     parts = [p for p in raw.split(",") if p.strip()]
     return [p.strip() for p in parts]
 
+SCAN_PREFIX = {
+    "One Piece": "OP",
+    "L'Atelier des Sorciers": "LDS",
+}
+
+# Prochain chapitre basé sur l'existant (entiers uniquement)
+def next_chapter_number(existing):
+    nums = []
+    for c in existing:
+        s = str(c)
+        if "cover" in s.lower():
+            continue
+        try:
+            nums.append(int(float(s)))
+        except Exception:
+            continue
+    return (max(nums) if nums else 0) + 1
+
 # Fonction de tri robuste (déjà vue)
 def sort_key(chap_str):
     if "cover" in str(chap_str).lower(): return 999999.0
@@ -156,8 +174,26 @@ def main():
                     "chapter_title": ""
                 })
     else:
-        logger.info("📡 Scan des nouveautés...")
-        found_chapters = bot_scraper.get_latest_chapters_from_feed(config['pages_to_scan'], tracked_names)
+        logger.info("📡 Ping du prochain chapitre...")
+        for m_name in tracked_names:
+            prefix = SCAN_PREFIX.get(m_name)
+            if not prefix:
+                logger.warning(f"⚠️ Prefix scan manquant pour {m_name}")
+                continue
+            current_state = manga_state.get(m_name, {})
+            existing = current_state.get("existing_chapters", [])
+            next_num = next_chapter_number(existing)
+            scan_id = f"{prefix}{next_num}"
+            if bot_scraper.scan_exists(scan_id):
+                found_chapters.append({
+                    "manga_name": m_name,
+                    "author": "Inconnu",
+                    "scan_id": scan_id,
+                    "chapter_num": str(next_num),
+                    "chapter_title": ""
+                })
+            else:
+                logger.info(f"⏭️ {m_name} {next_num} pas dispo")
 
     # 4. Base de données pour le JSON final
     db_store = {}

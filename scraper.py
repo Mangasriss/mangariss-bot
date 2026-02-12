@@ -83,6 +83,26 @@ class MangaScraper:
             
         return found_chapters
 
+    def scan_exists(self, scan_id):
+        """Retourne True si le scan existe (teste 01.png / 1.png)."""
+        base_img_url = f"{self.base_url}/files/scans/{scan_id}/"
+        for filename in ("01.png", "1.png"):
+            img_url = urljoin(base_img_url, filename)
+            r = None
+            try:
+                r = self.scraper.get(img_url, headers=self.headers, timeout=10, stream=True)
+                if r.status_code == 200:
+                    return True
+            except Exception as e:
+                logger.warning(f"      ⚠️ Erreur ping {scan_id}: {e}")
+            finally:
+                try:
+                    if r is not None:
+                        r.close()
+                except Exception:
+                    pass
+        return False
+
     def download_images_generator(self, scan_id):
         """ 
         Générateur qui envoie les images une par une dès qu'elles sont téléchargées.
